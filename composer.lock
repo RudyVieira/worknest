@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21a00f79a9f44acf9542adad9a7b662a",
+    "content-hash": "f170f9c32d6790fd3adf4329a21e6dff",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2538,6 +2538,70 @@
                 "source": "https://github.com/laravel/tinker/tree/v2.11.0"
             },
             "time": "2025-12-19T19:16:45+00:00"
+        },
+        {
+            "name": "laraveljutsu/zap",
+            "version": "v1.9.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ludoguenet/laravel-zap.git",
+                "reference": "f7ad7ee2132a54c52fbb63708abf26c7b078000a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ludoguenet/laravel-zap/zipball/f7ad7ee2132a54c52fbb63708abf26c7b078000a",
+                "reference": "f7ad7ee2132a54c52fbb63708abf26c7b078000a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2 <8.6"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.20",
+                "orchestra/testbench": "^10.0",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Zap": "Zap\\Facades\\Zap"
+                    },
+                    "providers": [
+                        "Zap\\ZapServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Laravel Jutsu",
+                    "email": "ludo@epekta.com",
+                    "homepage": "https://laraveljutsu.net"
+                }
+            ],
+            "description": "A flexible, performant, and developer-friendly schedule management system for Laravel",
+            "keywords": [
+                "booking",
+                "calendar",
+                "laravel",
+                "management",
+                "schedule"
+            ],
+            "support": {
+                "issues": "https://github.com/ludoguenet/laravel-zap/issues",
+                "source": "https://github.com/ludoguenet/laravel-zap/tree/v1.9.2"
+            },
+            "time": "2025-12-02T21:58:43+00:00"
         },
         {
             "name": "larswiegers/laravel-maps",
@@ -5528,6 +5592,65 @@
                 }
             ],
             "time": "2025-02-21T14:16:57+00:00"
+        },
+        {
+            "name": "stripe/stripe-php",
+            "version": "v19.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stripe/stripe-php.git",
+                "reference": "4e3de7211645699b1f5b5f1f1b45bd9faf369426"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/4e3de7211645699b1f5b5f1f1b45bd9faf369426",
+                "reference": "4e3de7211645699b1f5b5f1f1b45bd9faf369426",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "3.72.0",
+                "phpstan/phpstan": "^1.2",
+                "phpunit/phpunit": "^5.7 || ^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Stripe\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stripe and contributors",
+                    "homepage": "https://github.com/stripe/stripe-php/contributors"
+                }
+            ],
+            "description": "Stripe PHP Library",
+            "homepage": "https://stripe.com/",
+            "keywords": [
+                "api",
+                "payment processing",
+                "stripe"
+            ],
+            "support": {
+                "issues": "https://github.com/stripe/stripe-php/issues",
+                "source": "https://github.com/stripe/stripe-php/tree/v19.1.0"
+            },
+            "time": "2025-12-16T19:48:17+00:00"
         },
         {
             "name": "symfony/clock",
