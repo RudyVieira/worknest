@@ -58,4 +58,36 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->status === 'ACTIVE';
     }
+
+    /**
+     * Get the spaces owned by the user.
+     */
+    public function ownedSpaces()
+    {
+        return $this->hasMany(Space::class, 'owner_id');
+    }
+
+    /**
+     * Get the reservations made by the user.
+     */
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Get the invoices for the user.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get the activity logs for the user.
+     */
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }
