@@ -52,6 +52,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Get the user's full name.
+     */
+    public function getNameAttribute(): string
+    {
+        return "{$this->firstname} {$this->lastname}";
+    }
+
+    /**
      * Determine if the user can access the Filament panel.
      */
     public function canAccessPanel(Panel $panel): bool

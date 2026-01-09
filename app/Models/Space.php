@@ -43,6 +43,7 @@ class Space extends Model
     public function equipmentTypes(): BelongsToMany
     {
         return $this->belongsToMany(EquipmentType::class, 'space_equipment')
-            ->withPivot('quantity');
+            ->withPivot('quantity')
+            ->using(SpaceEquipment::class);
     }
 }
