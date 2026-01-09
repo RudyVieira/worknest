@@ -28,11 +28,11 @@ class SpaceController extends Controller
         }
 
         // Capacity filter
-        if ($request->has('capacity')) {
+        if ($request->has('capacity') && is_numeric($request->input('capacity'))) {
             $query->where('capacity', '>=', $request->input('capacity'));
         }
 
-        $spaces = $query->paginate(12);
+        $spaces = $query->paginate(9);
 
         return view('spaces.index', compact('spaces'));
     }
