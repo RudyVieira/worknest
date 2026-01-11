@@ -23,20 +23,30 @@ class ReservationFactory extends Factory
 
         $status = fake()->randomElement(['PENDING', 'PAID', 'PAID', 'PAID', 'CANCELLED']);
         
-        $space = Space::factory()->create();
+        // Use an existing space instead of creating a new one
+        $space = Space::inRandomOrder()->first() ?? Space::factory()->create();
+        $numberOfPeople = fake()->numberBetween(1, min($space->capacity, 4));
         $hoursBooked = ($endDatetime->getTimestamp() - $startDatetime->getTimestamp()) / 3600;
-        $totalPrice = $space->price_per_hour * $hoursBooked;
+        $totalPrice = $space->price_per_hour * $hoursBooked * $numberOfPeople;
+
+        // Pour les réservations PAID, la date de paiement doit être avant la date de début ou maintenant
+        $paidAt = null;
+        if ($status === 'PAID') {
+            $maxPaidDate = $startDatetime < now() ? $startDatetime : now();
+            $paidAt = fake()->dateTimeBetween('-2 months', $maxPaidDate);
+        }
 
         return [
             'user_id' => User::factory(),
             'space_id' => $space->id,
+            'number_of_people' => $numberOfPeople,
             'zap_appointment_id' => fake()->numberBetween(1, 1000),
             'start_datetime' => $startDatetime,
             'end_datetime' => $endDatetime,
             'status' => $status,
             'stripe_payment_intent_id' => $status === 'PAID' ? 'pi_' . fake()->uuid() : null,
             'total_price' => round($totalPrice, 2),
-            'paid_at' => $status === 'PAID' ? fake()->dateTimeBetween($startDatetime, 'now') : null,
+            'paid_at' => $paidAt,
         ];
     }
 

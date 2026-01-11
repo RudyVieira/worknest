@@ -31,8 +31,10 @@ class SpaceFactory extends Factory
         return [
             'name' => fake()->randomElement($spaceTypes) . ' ' . fake()->city(),
             'description' => fake()->paragraph(3),
+            'image' => null, // Les images seront gérées manuellement
             'latitude' => fake()->latitude(48.8, 48.9),
             'longitude' => fake()->longitude(2.2, 2.4),
+            'address' => fake()->streetAddress() . ', ' . fake()->postcode() . ' ' . fake()->city(),
             'capacity' => fake()->numberBetween(2, 50),
             'price_per_hour' => fake()->randomFloat(2, 10, 150),
             'owner_id' => User::factory(),
