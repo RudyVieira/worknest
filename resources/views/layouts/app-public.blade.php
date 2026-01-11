@@ -45,7 +45,7 @@
                 </div>
                 <div class="flex items-center">
                     @auth
-                        <span class="text-gray-700 mr-4">{{ auth()->user()->firstname }}</span>
+                        <a class="text-gray-500 hover:text-gray-700 mr-4" href="{{ route('profile.edit') }}">Mon profil</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="text-gray-500 hover:text-gray-700">Déconnexion</button>
