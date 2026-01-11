@@ -16,8 +16,10 @@ class Space extends Model
     protected $fillable = [
         'name',
         'description',
+        'image',
         'latitude',
         'longitude',
+        'address',
         'capacity',
         'price_per_hour',
         'owner_id',
