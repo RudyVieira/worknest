@@ -74,8 +74,9 @@ class PaymentController extends Controller
                 'reservation_id' => $reservation->id,
                 'user_id' => $reservation->user_id,
                 'space_id' => $reservation->space_id,
+                'number_of_people' => $reservation->number_of_people,
             ],
-            'description' => "Réservation de {$reservation->space->name} pour le {$reservation->start_datetime->format('d/m/Y')}",
+            'description' => "Réservation de {$reservation->space->name} pour le {$reservation->start_datetime->format('d/m/Y')} - {$reservation->number_of_people} personne(s)",
             'automatic_payment_methods' => [
                 'enabled' => true,
             ],

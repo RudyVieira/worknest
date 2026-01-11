@@ -33,8 +33,15 @@ class SpaceController extends Controller
         }
 
         $spaces = $query->paginate(9);
+        
+        // Get all spaces for map (without pagination)
+        $allSpaces = Space::with('owner', 'equipmentTypes')
+            ->where('status', 'AVAILABLE')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get();
 
-        return view('spaces.index', compact('spaces'));
+        return view('spaces.index', compact('spaces', 'allSpaces'));
     }
 
     /**
@@ -95,29 +102,26 @@ class SpaceController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // Get booked periods
-        $bookedPeriods = $space->schedules()
-            ->where('schedule_type', ScheduleTypes::APPOINTMENT)
-            ->with(['periods' => function ($query) use ($date) {
-                $query->where('date', $date->toDateString())
-                    ->where('is_available', false);
-            }])
-            ->get()
-            ->pluck('periods')
-            ->flatten();
-
-        // Filter out overlapping slots
+        // Check capacity for each slot
         foreach ($periods as $period) {
-            $isBooked = false;
+            // Get all overlapping reservations for this time slot
+            $overlappingReservations = Reservation::where('space_id', $space->id)
+                ->where('status', '!=', 'CANCELLED')
+                ->where(function ($query) use ($date, $period) {
+                    $startDateTime = $date->toDateString() . ' ' . $period->start_time;
+                    $endDateTime = $date->toDateString() . ' ' . $period->end_time;
+                    $query->where(function ($q) use ($startDateTime, $endDateTime) {
+                        $q->where('start_datetime', '<', $endDateTime)
+                            ->where('end_datetime', '>', $startDateTime);
+                    });
+                })
+                ->sum('number_of_people');
 
-            foreach ($bookedPeriods as $booked) {
-                if ($period->start_time < $booked->end_time && $period->end_time > $booked->start_time) {
-                    $isBooked = true;
-                    break;
-                }
-            }
+            // Calculate remaining capacity
+            $remainingCapacity = $space->capacity - $overlappingReservations;
 
-            if (!$isBooked) {
+            // Only show slot if there's capacity remaining
+            if ($remainingCapacity > 0) {
                 $startTime = Carbon::parse($period->start_time);
                 $endTime = Carbon::parse($period->end_time);
                 $hours = $endTime->diffInHours($startTime, true);
@@ -127,6 +131,7 @@ class SpaceController extends Controller
                     'end_time' => $period->end_time,
                     'duration' => $hours,
                     'price' => round($space->price_per_hour * $hours, 2),
+                    'remaining_capacity' => $remainingCapacity,
                 ];
             }
         }
@@ -163,6 +168,7 @@ class SpaceController extends Controller
             'date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
+            'number_of_people' => 'required|integer|min:1|max:' . $space->capacity,
         ]);
 
         // Verify the user is authenticated
@@ -176,15 +182,16 @@ class SpaceController extends Controller
         }
 
         // Check availability
-        $isAvailable = $this->checkSlotAvailability(
+        $availabilityCheck = $this->checkSlotAvailability(
             $space,
             $validated['date'],
             $validated['start_time'],
-            $validated['end_time']
+            $validated['end_time'],
+            $validated['number_of_people']
         );
 
-        if (!$isAvailable) {
-            return back()->with('error', 'Ce créneau n\'est plus disponible. Veuillez en choisir un autre.');
+        if (!$availabilityCheck['available']) {
+            return back()->with('error', $availabilityCheck['message']);
         }
 
         // Create or get appointment schedule
@@ -201,7 +208,8 @@ class SpaceController extends Controller
         $startDateTime = Carbon::parse($validated['date'] . ' ' . $validated['start_time']);
         $endDateTime = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
         $hours = $endDateTime->diffInHours($startDateTime, true);
-        $totalPrice = round($space->price_per_hour * $hours, 2);
+        // Price is multiplied by the number of people
+        $totalPrice = round($space->price_per_hour * $hours * $validated['number_of_people'], 2);
 
         // Create the appointment period
         $period = $appointmentSchedule->periods()->create([
@@ -219,6 +227,7 @@ class SpaceController extends Controller
         $reservation = Reservation::create([
             'user_id' => auth()->id(),
             'space_id' => $space->id,
+            'number_of_people' => $validated['number_of_people'],
             'zap_appointment_id' => $period->id,
             'start_datetime' => $startDateTime,
             'end_datetime' => $endDateTime,
@@ -231,9 +240,9 @@ class SpaceController extends Controller
     }
 
     /**
-     * Check if a specific slot is available.
+     * Check if a specific slot is available with the requested number of people.
      */
-    private function checkSlotAvailability(Space $space, string $date, string $startTime, string $endTime): bool
+    private function checkSlotAvailability(Space $space, string $date, string $startTime, string $endTime, int $numberOfPeople): array
     {
         // Check availability schedule exists
         $hasAvailability = $space->schedules()
@@ -253,25 +262,40 @@ class SpaceController extends Controller
             ->exists();
 
         if (!$hasAvailability) {
-            return false;
+            return [
+                'available' => false,
+                'message' => 'Ce créneau n\'est pas disponible.'
+            ];
         }
 
-        // Check no conflicting appointments
-        $hasConflict = $space->schedules()
-            ->where('schedule_type', ScheduleTypes::APPOINTMENT)
-            ->whereHas('periods', function ($query) use ($date, $startTime, $endTime) {
-                $query->where('date', $date)
-                    ->where('is_available', false)
-                    ->where(function ($q) use ($startTime, $endTime) {
-                        $q->where(function ($q2) use ($startTime, $endTime) {
-                            $q2->where('start_time', '<', $endTime)
-                                ->where('end_time', '>', $startTime);
-                        });
-                    });
+        // Get all overlapping reservations for this time slot
+        $overlappingReservations = Reservation::where('space_id', $space->id)
+            ->where('status', '!=', 'CANCELLED')
+            ->where(function ($query) use ($date, $startTime, $endTime) {
+                $startDateTime = $date . ' ' . $startTime;
+                $endDateTime = $date . ' ' . $endTime;
+                $query->where(function ($q) use ($startDateTime, $endDateTime) {
+                    $q->where('start_datetime', '<', $endDateTime)
+                        ->where('end_datetime', '>', $startDateTime);
+                });
             })
-            ->exists();
+            ->sum('number_of_people');
 
-        return !$hasConflict;
+        // Check if adding this reservation would exceed capacity
+        $remainingCapacity = $space->capacity - $overlappingReservations;
+        
+        if ($numberOfPeople > $remainingCapacity) {
+            return [
+                'available' => false,
+                'message' => "Ce créneau n'a plus assez de place disponible. Capacité restante: {$remainingCapacity} personne(s)."
+            ];
+        }
+
+        return [
+            'available' => true,
+            'message' => 'Créneau disponible',
+            'remaining_capacity' => $remainingCapacity
+        ];
     }
 
     /**
