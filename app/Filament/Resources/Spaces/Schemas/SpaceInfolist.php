@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Spaces\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -19,6 +20,14 @@ class SpaceInfolist
                             ->label('Nom'),
                         TextEntry::make('description')
                             ->label('Description')
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        ImageEntry::make('image')
+                            ->label('Image')
+                            ->columnSpanFull()
+                            ->hidden(fn ($record) => !$record?->image),
+                        TextEntry::make('address')
+                            ->label('Adresse')
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('latitude')

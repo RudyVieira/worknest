@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Spaces\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -23,6 +24,24 @@ class SpaceForm
                             ->required(),
                         Textarea::make('description')
                             ->label('Description')
+                            ->columnSpanFull(),
+                        FileUpload::make('image')
+                            ->label('Image')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ])
+                            ->disk('public')
+                            ->directory('spaces')
+                            ->visibility('public')
+                            ->maxSize(5120) // 5MB
+                            ->columnSpanFull()
+                            ->helperText('Format acceptés: JPG, PNG. Taille maximale: 5MB'),
+                        TextInput::make('address')
+                            ->label('Adresse')
                             ->columnSpanFull(),
                         TextInput::make('latitude')
                             ->label('Latitude')

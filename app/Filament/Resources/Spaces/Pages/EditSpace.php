@@ -54,5 +54,10 @@ class EditSpace extends EditRecord
         }
 
         $this->record->equipmentTypes()->sync($syncData);
+        
+        // Assigner automatiquement le rôle 'owner' au propriétaire de l'espace
+        if ($this->record->owner && !$this->record->owner->hasRole('owner')) {
+            $this->record->owner->assignRole('owner');
+        }
     }
 }

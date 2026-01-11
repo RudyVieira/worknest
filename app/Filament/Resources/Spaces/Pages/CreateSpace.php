@@ -30,5 +30,10 @@ class CreateSpace extends CreateRecord
         }
 
         $this->record->equipmentTypes()->attach($attachData);
+        
+        // Assigner automatiquement le rôle 'owner' au propriétaire de l'espace
+        if ($this->record->owner && !$this->record->owner->hasRole('owner')) {
+            $this->record->owner->assignRole('owner');
+        }
     }
 }

@@ -14,21 +14,42 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('firstname')
+                    ->label('Prénom')
                     ->required(),
                 TextInput::make('lastname')
+                    ->label('Nom')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Email')
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
+                DateTimePicker::make('email_verified_at')
+                    ->label('Email vérifié le'),
                 TextInput::make('password')
+                    ->label('Mot de passe')
                     ->password()
-                    ->required(),
+                    ->required(fn ($context) => $context === 'create')
+                    ->dehydrated(fn ($state) => filled($state)),
                 Select::make('status')
-                    ->options(['ACTIVE' => 'A c t i v e', 'SUSPENDED' => 'S u s p e n d e d'])
+                    ->label('Statut')
+                    ->options([
+                        'ACTIVE' => 'Actif', 
+                        'SUSPENDED' => 'Suspendu'
+                    ])
                     ->default('ACTIVE')
                     ->required(),
+                Select::make('roles')
+                    ->label('Rôles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->getOptionLabelFromRecordUsing(fn ($record) => match($record->name) {
+                        'admin' => 'Administrateur',
+                        'owner' => 'Propriétaire',
+                        'user' => 'Utilisateur',
+                        default => $record->name,
+                    })
+                    ->helperText('Sélectionnez un ou plusieurs rôles pour cet utilisateur'),
             ]);
     }
 }

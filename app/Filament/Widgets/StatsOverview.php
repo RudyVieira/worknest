@@ -13,8 +13,8 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         $user = auth()->user();
-        $isAdmin = $user->hasRole('administrator');
-        $isSpaceOwner = $user->hasRole('space_owner');
+        $isAdmin = $user->hasRole('admin');
+        $isSpaceOwner = $user->hasRole('owner');
 
         $stats = [];
 
@@ -26,25 +26,10 @@ class StatsOverview extends BaseWidget
                 ->sum('total_price');
 
             $stats = [
-                Stat::make('Total Espaces', $totalSpaces)
-                    ->description('Nombre total d\'espaces')
-                    ->descriptionIcon('heroicon-m-building-office-2')
-                    ->color('success'),
-
-                Stat::make('Total Utilisateurs', $totalUsers)
-                    ->description('Nombre total d\'utilisateurs')
-                    ->descriptionIcon('heroicon-m-users')
-                    ->color('info'),
-
-                Stat::make('Total Réservations', $totalReservations)
-                    ->description('Toutes les réservations')
-                    ->descriptionIcon('heroicon-m-calendar-days')
-                    ->color('warning'),
-
-                Stat::make('Revenus Total', number_format($totalRevenue, 2, ',', ' ') . ' €')
-                    ->description('Revenus de toutes les réservations')
-                    ->descriptionIcon('heroicon-m-currency-euro')
-                    ->color('success'),
+                Stat::make('Total Espaces', $totalSpaces),
+                Stat::make('Total Utilisateurs', $totalUsers),
+                Stat::make('Total Réservations', $totalReservations),
+                Stat::make('Revenus Total', number_format($totalRevenue, 2, ',', ' ') . ' €'),
             ];
         } elseif ($isSpaceOwner) {
             $ownedSpaceIds = $user->ownedSpaces()->pluck('id');
@@ -55,20 +40,9 @@ class StatsOverview extends BaseWidget
                 ->sum('total_price');
 
             $stats = [
-                Stat::make('Mes Espaces', $totalSpaces)
-                    ->description('Nombre d\'espaces possédés')
-                    ->descriptionIcon('heroicon-m-building-office-2')
-                    ->color('success'),
-
-                Stat::make('Réservations', $totalReservations)
-                    ->description('Total de réservations')
-                    ->descriptionIcon('heroicon-m-calendar-days')
-                    ->color('warning'),
-
-                Stat::make('Revenus', number_format($totalRevenue, 2, ',', ' ') . ' €')
-                    ->description('Revenus de vos espaces')
-                    ->descriptionIcon('heroicon-m-currency-euro')
-                    ->color('success'),
+                Stat::make('Mes Espaces', $totalSpaces),
+                Stat::make('Réservations au sein de vos espaces', $totalReservations),
+                Stat::make('Revenus de vos espaces', number_format($totalRevenue, 2, ',', ' ') . ' €'),
             ];
         }
 

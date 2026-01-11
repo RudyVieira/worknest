@@ -17,12 +17,17 @@ class SpacesTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('address')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('latitude')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('longitude')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('capacity')
                     ->numeric()
                     ->sortable(),
