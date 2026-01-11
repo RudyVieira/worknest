@@ -15,7 +15,7 @@ class SpacePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_spaces') || $user->hasRole('space_owner');
+        return $user->can('view_spaces') || $user->hasRole('owner');
     }
 
     /**
@@ -28,7 +28,7 @@ class SpacePolicy
         }
 
         // Space owner can only view their own spaces
-        return $user->hasRole('space_owner') && $space->owner_id === $user->id;
+        return $user->hasRole('owner') && $space->owner_id === $user->id;
     }
 
     /**
@@ -49,7 +49,7 @@ class SpacePolicy
         }
 
         // Space owner can edit their own spaces
-        return $user->hasRole('space_owner') && $space->owner_id === $user->id;
+        return $user->hasRole('owner') && $space->owner_id === $user->id;
     }
 
     /**
